@@ -1,0 +1,64 @@
+
+import java.io.IOException;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
+/*
+ToDo
+
+*/
+
+/**
+ * Servlet implementation c lass Testing
+ */
+//@WebServlet("/Stores")
+public class Testing extends HttpServlet {
+	HashMap<String, MaterialInfo> map = new HashMap<String, MaterialInfo>();
+	CsvFileReader readFile = new CsvFileReader();
+	CsvFileWriter writeFile = new CsvFileWriter();
+	private static final String TRANS_FILE_PATH = "c:\\inventory\\transaction.csv";
+	private static final String INV_FILE_PATH = "c:\\inventory\\inventory.csv";
+
+	public void init() throws ServletException {
+		// Initialization code...
+		readFile.readCsvFile(TRANS_FILE_PATH, map);
+
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String strForm = request.getParameter("FormName");
+	
+		
+		if(strForm.equals("F1"))
+		{
+			String strID = request.getParameter("ID");
+			String strDesc = request.getParameter("Description");
+			String strQty = request.getParameter("Qty");
+			System.out.println("****WELCOME****");
+			MaterialInfo entry = new MaterialInfo(Integer.parseInt(strQty),strDesc);
+			writeFile.writeCsvFile(TRANS_FILE_PATH,
+					strID, 
+					entry,
+					map);
+			response.sendRedirect("success.html");
+		}
+		else if(strForm.equals("F2"))
+		{
+			writeFile.writeCurrrentInventory(INV_FILE_PATH, map);
+			response.sendRedirect("success.html");
+		}
+	
+	}
+
+	MaterialInfo obj;
+
+}
