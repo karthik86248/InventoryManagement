@@ -1,0 +1,11 @@
+
+Material ID,Desc,Current Qty,SCHOOLBAG(1),LUNCHBAG(1),SCHOOLUNIFORM(1),Shortage/excess to meet target
+pid#3,WaterBottle,1,-,1,-,0
+pid#2,PencilBox,1,1,-,-,0
+pid#1,Book,4,2,-,-,2
+pid#6,Trouser,1,-,-,1,0
+pid#5,Shirt,1,-,-,1,0
+pid#4,LunchBox,1,-,1,-,0
+,Requested product targets in current inventory ->,,1,1,1
+,Achievable product targets in current inventory ->,,1,1,1
+,Material (type/ID) counts -> ,6,2,2,2

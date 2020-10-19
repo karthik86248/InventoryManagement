@@ -31,6 +31,7 @@ public class CsvFileReader {
 
 		try {
 			String line = "";
+			
 
 			// Create the file reader
 			fileReader = new BufferedReader(new FileReader(fileName));
@@ -40,24 +41,26 @@ public class CsvFileReader {
 
 			// Read the file line by line starting from the second line
 			// ID,Desc,Qty,Time,notes
+			// 0  1    2   3    4      <- token index
 			// Note: Desc could contain commas
 			while ((line = fileReader.readLine()) != null) {
+				String strConcatenatedDesc ="";
 				// Get all tokens available in line
 				String[] tokens = line.split(COMMA_DELIMITER);
-				String strConnatenatedDesc = "";
+			
 				// handle case when the Desc has commas
 				if (tokens.length > 5) {
 					for (int nIter = 1; nIter < tokens.length - 3; nIter++)
-						strConnatenatedDesc += tokens[nIter];
+						strConcatenatedDesc += tokens[nIter];
 				}
 
 				if (tokens.length >= 5) {
 
 					MaterialInfo entry = new MaterialInfo(Integer.parseInt(tokens[tokens.length - 3]),
-							tokens.length > 5 ? strConnatenatedDesc : tokens[MATERIAL_DESC_IDX],tokens[tokens.length - 1]);
+							tokens.length > 5 ? strConcatenatedDesc : tokens[MATERIAL_DESC_IDX],tokens[tokens.length - 1]);
 
 					MaterialInfo entry1 = map.get(tokens[MATERIAL_ID_IDX]);
-					System.out.println("Trying to read from transactionmap" + tokens[MATERIAL_ID_IDX] + entry1);
+					System.out.println("Trying to read the entry from transactio.csv file:" + tokens[MATERIAL_ID_IDX] + "," + entry1);
 					if (entry1 != null) {
 						entry1.nQty = entry.nQty + entry1.nQty;
 					} else {
@@ -184,11 +187,14 @@ public class CsvFileReader {
 				if (tokens.length == 1) {
 
 					if (listMaterials.Size() > 0 && strProdName.isEmpty() != true) {
+						// marks end of current product BOM
 						System.out.println("Inserting into ProductBOMmap, Product Name:" + strProdName);
 						mapProdBOM.put(strProdName, listMaterials);
+						CatalogDB.InsertIntoProductList(strProdName);
 						listMaterials = new MaterialList();
-						strProdName = tokens[0];
+						strProdName = tokens[0]; 
 					} else {
+						// marks start of a fresh product BOM
 						strProdName = tokens[0];
 					}
 				}
@@ -210,6 +216,7 @@ public class CsvFileReader {
 			try {
 				if (listMaterials.Size() > 0 && strProdName.isEmpty() != true) {
 					mapProdBOM.put(strProdName, listMaterials);
+					CatalogDB.InsertIntoProductList(strProdName);
 					System.out.println("Inserting into ProductBOMmap, Product Name:" + strProdName);
 					fileReader.close();
 				}

@@ -1,12 +1,22 @@
 package mypackage;
+
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
+import mypackage.Materials;
+
+/*
+ * This class models the materials and product details
+ * Material Catalog - Material ID and its corresponding description
+ * Build Of Materials - What materials are needed and in what qty to build a specific Product
+ * High Value Materials - List of High value Material IDs
+ */
+
 
 public class CatalogDB {
 	//private static boolean s_bIsInitialised = false;
 	// in memory data structures
-	// material ID to description map ProdCatalogmap
+	// material ID to description map MaterialCatalogmap
 	private static HashMap<String, MaterialCatalog> mapCatalog = new HashMap<String, MaterialCatalog>();
 	// ProductName to Material info map ProductBOMmap
 	private static HashMap<String, MaterialList> mapProductBOM = new HashMap<String, MaterialList>();
@@ -14,15 +24,35 @@ public class CatalogDB {
 	private static HashMap<String, String> mapMiniInv = new HashMap<String, String>();
 
 	private static boolean bInitialised  = false;
-	// map <MaterialID, materials> mapProducts
 
-	public static final String DB_FILE_PATH = "D:\\MyInventoryDB\\";
-	private static final String CATALOG_FILE_PATH = DB_FILE_PATH + "MaterialDesc.csv";
-	private static final String PRODUCTBOM_FILE_PATH = DB_FILE_PATH + "ProductBOM.csv";
-	private static final String MINIINV_FILE_PATH = DB_FILE_PATH + "MaterialMiniInventory.csv";
+	private static List<String> ProductList =new ArrayList<String>();
+
+	public static void InsertIntoProductList(String strName)
+	{
+		ProductList.add(strName);
+	}
+
+	public static List<String> GetProductList()
+	{
+		return ProductList;
+	}
+	/*public static final String DB_FILE_PATH = "D:\\MyInventoryDB\\";
+
+	static String CATALOG_FILE_PATH = Materials.DB_FILE_PATH + "MaterialDesc.csv";
+	static String PRODUCTBOM_FILE_PATH = Materials.DB_FILE_PATH + "ProductBOM.csv";
+	static String MINIINV_FILE_PATH = Materials.DB_FILE_PATH + "MaterialMiniInventory.csv";
+	*/
+
+	String CATALOG_FILE_PATH ;
+	String PRODUCTBOM_FILE_PATH;
+	String MINIINV_FILE_PATH;
 
 	public CatalogDB()
 	{
+		// recompute the file paths
+		CATALOG_FILE_PATH = Materials.DB_FILE_PATH + "MaterialDesc.csv";
+		PRODUCTBOM_FILE_PATH = Materials.DB_FILE_PATH + "ProductBOM.csv";
+		MINIINV_FILE_PATH = Materials.DB_FILE_PATH + "MaterialMiniInventory.csv";
 
 	}
 
@@ -52,6 +82,9 @@ public class CatalogDB {
 		List<String> matched = new ArrayList<String>();
 		query = query.toLowerCase();
 		for (String strKey : mapCatalog.keySet()) {
+			// We insert the material ID in lowercase as the map keys are
+			// case-sensitive. so send keys in lower case to auto-complete
+
 			strID = strKey.toLowerCase();
 			if(strID.startsWith(query)) {
 				strEntry = strID + "," + mapCatalog.get(strKey).getStrDesc();

@@ -7,10 +7,11 @@
 <title>Material Update Result</title>
 </head>
 <body>
-Update success
- <p>Message: ${message}</p>
-<form action="Materials.jsp">
- <INPUT TYPE="submit" NAME="Update Materials" VALUE="Materials">
+Action Success!
+ <p>Message:</p>
+ <p> ${message}</p>
+<form action="Materials">
+ <INPUT TYPE="submit" NAME="Update Materials" VALUE="BACK">
 </form>
 
 </body>

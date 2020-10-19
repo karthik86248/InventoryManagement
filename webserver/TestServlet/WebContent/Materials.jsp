@@ -3,6 +3,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
 
 "http://www.w3.org/TR/html4/loose.dtd">
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <html>
 <head>
 
@@ -20,7 +23,7 @@
 		var b = t.M_Qty.value;
 		var c = t.M_ID.value;
 		var d = t.P_NAME.value;
-		
+			
 		if (IsEmpty(c) == true && IsEmpty(d) == true) {
 			alert("Error: Because you need to enter a Material ID OR Product Name in the respective box");
 			return false;
@@ -162,10 +165,10 @@ input {
 		<p>
 			<label> Enter Product Name : <select id="P_NAME"
 				name="P_NAME">
-					<option label=" "></option>
-					<option value="COMETPLUS">COMETPLUS</option>
-					<option value="TruSkan S500">TruSkan S500</option>
-					<option value="PLANET 45">PLANET 45</option>
+				<option label=" "></option>	
+			    	<c:forEach items="${ProductList}" var="ProdName">
+					<option value="${ProdName}">${ProdName}</option>
+			    	</c:forEach>					
 			</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				Enter Qty (with +/-) :<input type="text" id="P_Qty" name="P_Qty"
 				size="10">
@@ -179,8 +182,8 @@ input {
 		<p>
 		<h4>
 			Notes: <br> 1. Don't update materials with unit "M" or "ROL".
-			Use only materials with units "EA" 1. Don't use comma (,) in Notes
-			box
+			Use only materials with units "EA" <br> 2. Don't use comma (,) in Notes
+			box. <br> 3. Material IDs to be entered in lower-case/small letters only.
 		</h4>
 
 	</form>
@@ -207,35 +210,43 @@ input {
 		<p>
 			<label> Enter Product Name : <select id="P1_NAME"
 				name="P1_NAME">
-					<option value="COMETPLUS" selected>COMETPLUS</option>
-					<option value="TruSkan S500">TruSkan S500</option>
-					<option value="PLANET 45">PLANET 45</option>
-			</select> Enter Qty : <input type="text" id="P1_Qty" name="P1_Qty" size="10">
+					<option label=" "></option>	
+					<c:forEach items="${ProductList}" var="ProdName">
+						<option value="${ProdName}">${ProdName}</option>
+					</c:forEach>					
+
+			</select> Enter Targetted Qty : <input type="text" id="P1_Qty" name="P1_Qty" size="10">
 			</label>
 		</p>
 
 		<p>
 			<label> Enter Product Name : <select id="P2_NAME"
 				name="P2_NAME">
-					<option value="COMETPLUS">COMETPLUS</option>
-					<option value="TruSkan S500" selected>TruSkan S500</option>
-					<option value="PLANET 45">PLANET 45</option>
-			</select> Enter Qty : <input type="text" id="P2_Qty" name="P2_Qty" size="10">
+				<option label=" "></option>	
+			    	<c:forEach items="${ProductList}" var="ProdName">
+					<option value="${ProdName}">${ProdName}</option>
+			    	</c:forEach>					
+			</select> Enter Targetted Qty : <input type="text" id="P2_Qty" name="P2_Qty" size="10">
 			</label>
 		</p>
 
 		<p>
 			<label> Enter Product Name : <select id="P3_NAME"
 				name="P3_NAME">
-					<option value="COMETPLUS">COMETPLUS</option>
-					<option value="TruSkan S500">TruSkan S500</option>
-					<option value="PLANET 45" selected>PLANET 45</option>
-			</select> Enter Qty : <input type="text" id="P3_Qty" name="P3_Qty" size="10">
+				<option label=" "></option>	
+			    	<c:forEach items="${ProductList}" var="ProdName">
+					<option value="${ProdName}">${ProdName}</option>
+			    	</c:forEach>					
+			</select> Enter Targetted Qty : <input type="text" id="P3_Qty" name="P3_Qty" size="10">
 			</label>
 		</p>
 		<p>
 			<INPUT TYPE="SUBMIT" VALUE="Calculate">
 		</p>
+
+			Notes: <br> 1. Enter the quantities of the respective products that you want to build with current invetory.
+			<BR> 2. All three rows have to be filled, with valid/(non-repeating) products and Qty not equal to 0.
+		
 	</FORM>
 </body>
 </html>

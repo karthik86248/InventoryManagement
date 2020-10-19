@@ -1,6 +1,10 @@
 package mypackage;
 
 import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.FileInputStream;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -10,8 +14,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.time.LocalDateTime; // import the LocalDate class
 import java.time.format.DateTimeFormatter;
 
@@ -26,16 +32,60 @@ public class Materials extends HttpServlet {
 	HashMap<String, MaterialInfo> map = new HashMap<String, MaterialInfo>();
 
 	private static final String COMMA_DELIMITER = ",";
-
+	public String test;
 	CsvFileReader readFile = new CsvFileReader();
 	CsvFileWriter writeFile = new CsvFileWriter();
-	public static final String LOG_FILE_PATH = "D:\\MyInventoryLogs\\"; // all user generated reports
-	public static final String DB_FILE_PATH = "D:\\MyInventoryDB\\"; //  internally used files
-	private static final String TRANS_FILE_PATH = DB_FILE_PATH + "Transaction.csv";
-	private static final String PRODUCT_TRANS_FILE_PATH = DB_FILE_PATH + "ProductTransaction.csv";
-	private static final String INV_GEN_FILE_NAME = LOG_FILE_PATH;
-	private static final String INV_CAL_FILE_NAME = LOG_FILE_PATH;
+	public static String REPORTS_FILE_PATH = "C:\\MyInventoryLogs\\"; // all user generated reports
+	public static String DB_FILE_PATH = "C:\\MyInventoryDB\\"; //  internally used files
+	private static String TRANS_FILE_PATH = DB_FILE_PATH + "Transaction.csv";
+	private static String PRODUCT_TRANS_FILE_PATH = DB_FILE_PATH + "ProductTransaction.csv";
+	private static String INV_GEN_FILE_NAME = REPORTS_FILE_PATH;
+	private static String INV_CAL_FILE_NAME = REPORTS_FILE_PATH;
 
+	boolean ReadPropertiesFile() {
+		
+		Properties prop = new Properties();
+		// This is the path of the properties file that will be used 
+		// while running directly as a WebApp under Tomcat
+		// If you are debugging under Eclipse IDE, then this path has to be
+		// adjusted per your choice
+		String fileName = "../webapps/MyInvenotoryMgmt.config";
+		InputStream is = null;
+		try {
+
+		  String currentDirectory = System.getProperty("user.dir");
+	      System.out.println("The current working directory is " + currentDirectory);
+
+		    is = new FileInputStream(fileName);
+		} catch (FileNotFoundException ex) {
+			System.out.println("Error in opening Properties file !!!");
+			ex.printStackTrace();
+			return false;
+		}
+		try {
+		    prop.load(is);
+		} catch (IOException ex) {
+			System.out.println("Error in loading Properties file !!!");
+			ex.printStackTrace();
+			return false;
+		}
+		System.out.println("DBLocation="+prop.getProperty("DBLocation"));
+		System.out.println("ReportsLocation"+prop.getProperty("ReportsLocation"));
+		//re-compute all the file paths
+		DB_FILE_PATH=prop.getProperty("DBLocation") + "\\";
+		REPORTS_FILE_PATH = prop.getProperty("ReportsLocation")+"\\";
+		TRANS_FILE_PATH = DB_FILE_PATH + "Transaction.csv";
+		PRODUCT_TRANS_FILE_PATH = DB_FILE_PATH + "ProductTransaction.csv";
+		INV_GEN_FILE_NAME = REPORTS_FILE_PATH;
+		INV_CAL_FILE_NAME = REPORTS_FILE_PATH;
+		
+		return true;
+		// ToDo: Verify if the files we need are indeed present under 
+		//those paths
+	
+	}
+	
+	
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -46,6 +96,8 @@ public class Materials extends HttpServlet {
 
 	public void init() throws ServletException {
 		// Initialization code...
+		if (false == ReadPropertiesFile())
+			throw new ServletException("Reading Config file failed");
 		readFile.readCsvFile(TRANS_FILE_PATH, map);
 		System.out.println("Size of Transactionmap=" + String.valueOf(map.size()));
 		CatalogDB obj = new CatalogDB();
@@ -61,8 +113,8 @@ public class Materials extends HttpServlet {
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 
-		String message = "Hello World";
-		request.setAttribute("message", message); // This will be available as ${message}
+		
+		request.setAttribute("ProductList", CatalogDB.GetProductList()); // This will be available as ${message}
 		request.getRequestDispatcher("Materials.jsp").forward(request, response);
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
@@ -74,11 +126,14 @@ public class Materials extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String strForm = request.getParameter("FormName");
-
+		String strUpdateMessage = "-";
+		
 		if (strForm.equals("F1")) {
 			// Update Materials
 			String strIDPlusDesc = request.getParameter("M_ID");
-			String strUpdateMessage = "Material Update";
+			strUpdateMessage = "Material Update:";
+			strUpdateMessage += "\r\n";
+
 			if (strIDPlusDesc.isEmpty() != true && strIDPlusDesc.indexOf(COMMA_DELIMITER) != -1) {
 				String[] tokens = strIDPlusDesc.split(COMMA_DELIMITER);
 				String strID = tokens[0];
@@ -87,6 +142,8 @@ public class Materials extends HttpServlet {
 				// String strDesc = request.getParameter("Description");
 				String strQty = request.getParameter("M_Qty");
 				String strNotes = request.getParameter("M_Notes");
+				if (strNotes.isEmpty() == true)
+					strNotes = "-";
 				int nMaterialQty = 0;
 				if (strQty.isEmpty() != true) {
 					nMaterialQty = Integer.parseInt(strQty);
@@ -104,6 +161,9 @@ public class Materials extends HttpServlet {
 
 			String strProductQty = request.getParameter("P_Qty");
 			String strProductNotes = request.getParameter("P_Notes");
+			if (strProductNotes.isEmpty() == true)
+				strProductNotes = "-";
+
 			int nProdQty = 0;
 			if (strProductQty.isEmpty() != true)
 				// ToDo: Catch the exception
@@ -111,32 +171,41 @@ public class Materials extends HttpServlet {
 
 			if (strProductName.isEmpty() != true && nProdQty != 0) {
 				ProductInfo entryProd = new ProductInfo(Integer.parseInt(strProductQty), strProductNotes);
-				UpdateProduct(strProductName, nProdQty);
+				UpdateProduct(strProductName, nProdQty,strProductNotes);
 				writeFile.writeToProdTransactionCsvFile(PRODUCT_TRANS_FILE_PATH, strProductName, entryProd);
 				strUpdateMessage = strUpdateMessage + "\n\tProduct Name =" + strProductName + " Quantity = "
 						+ strProductQty;
 			}
-			request.setAttribute("message", strUpdateMessage); // This will be available as ${message}
+			
+			request.setAttribute("message", strUpdateMessage); // This will be available as ${message} in the JSP
 
 			request.getRequestDispatcher("success.jsp").forward(request, response);
 
 //			response.sendRedirect("success.jsp");
 		} else if (strForm.equals("F2")) {
-
+			strUpdateMessage = "Material Reporting:";
 			LocalDateTime now = LocalDateTime.now();
 			// Format Oct-19-2019 16:39:32 PM, don't use : in the file name
 			DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM-dd-yyyy HH mm ss a");
 			String formatDateTime = now.format(format);
+			String strFileName;
 			if (request.getParameter("radios").equals("radio1")) {
-				writeFile.writeCurrrentInventory(INV_GEN_FILE_NAME + formatDateTime + "_FullInventory.csv", map);
+				strFileName = INV_GEN_FILE_NAME + formatDateTime + "_FullInventory.csv";
+				writeFile.writeCurrrentInventory(strFileName, map);
 			} else {
 				CatalogDB obj = new CatalogDB();
-				writeFile.writeCurrrentMiniInventory(INV_GEN_FILE_NAME + formatDateTime + "_MiniInventory.csv", map,
+				strFileName = INV_GEN_FILE_NAME + formatDateTime + "_MiniInventory.csv";
+				writeFile.writeCurrrentMiniInventory(strFileName, map,
 						obj.GetMiniInvMap());
 			}
+			strUpdateMessage += "\r\n";
+			strUpdateMessage += strFileName;
+			request.setAttribute("message", strUpdateMessage); // This will be available as ${message} in the JSP
 			request.getRequestDispatcher("success.jsp").forward(request, response);
 
 		} else if (strForm.equals("F3")) {
+			strUpdateMessage = "Material Estimating:";
+			String strFileName;
 			LocalDateTime now = LocalDateTime.now();
 			DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM-dd-yyyy HH mm ss a");
 			String formatDateTime = now.format(format);
@@ -161,14 +230,25 @@ public class Materials extends HttpServlet {
 
 			ProductPriority obj = new ProductPriority(strProduct1Name, strProduct2Name, strProduct3Name, nProd1Qty,
 					nProd2Qty, nProd3Qty);
-			writeFile.writeCalculatedInventory(INV_CAL_FILE_NAME + formatDateTime + "_Cal.csv", map, obj);
+			strFileName = INV_CAL_FILE_NAME + formatDateTime + "_Cal.csv";
+			writeFile.writeCalculatedInventory(strFileName , map, obj);
+			
+			strUpdateMessage += "\r\n";
+			strUpdateMessage += strFileName;
+			request.setAttribute("message", strUpdateMessage); // This will be available as ${message} in the JSP
 			request.getRequestDispatcher("success.jsp").forward(request, response);
 
 		}
 
 	}
 
-	protected void UpdateProduct(String strProdName, int nProdQty) {
+	protected void UpdateProduct(String strProdName, int nProdQty, String strNotes) {
+		/*
+		 * Get the Material list corresponding to this Product from the BOM
+		 * Iterate the Material infos in that list 
+		 * 	multiply the Qty with and update the notes
+		 *  
+		 */
 		CatalogDB objDB = new CatalogDB();
 		MaterialList listMaterials = objDB.GetMaterialsList(strProdName);
 		if (listMaterials != null && listMaterials.Size() > 0) {
@@ -178,7 +258,11 @@ public class Materials extends HttpServlet {
 
 				MaterialInfo entry = new MaterialInfo(mapMaterials.get(i));
 				entry.nQty = entry.nQty * nProdQty;
-				writeFile.writeCsvFile(TRANS_FILE_PATH, i, entry, map);
+				entry.strNotes = strNotes;
+				// We insert the material ID in lowercase as the map keys are
+				// case-sensitive
+				String strID = i.toLowerCase();
+				writeFile.writeCsvFile(TRANS_FILE_PATH, strID, entry, map);
 
 			}
 		}

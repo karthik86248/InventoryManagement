@@ -24,8 +24,9 @@ public class CsvFileWriter {
 	 * Write MaterialInfo contents to the specified Transaction log fileName and the map
 	 */
 
-	public void writeCsvFile(String fileName, String strID, MaterialInfo entry, HashMap<String, MaterialInfo> map) {
+	public void writeCsvFile(String fileName, String strIDWithCase, MaterialInfo entry, HashMap<String, MaterialInfo> map) {
 
+		String strID = strIDWithCase.toLowerCase();
 		MaterialInfo entry1 = map.get(strID);
 		if (entry1 != null) {
 			entry1.nQty = entry.nQty + entry1.nQty;
@@ -47,8 +48,8 @@ public class CsvFileWriter {
 			// Add a new line separator after the header
 			fileWriter.append(NEW_LINE_SEPARATOR);
 
-			// Write a new student object list to the CSV file
-			// for (Student student : students) {
+			// Write as comma separated value
+			// Material ID, Desc, Qty, Time, Notes,
 			fileWriter.append(strID);
 			fileWriter.append(COMMA_DELIMITER);
 			fileWriter.append(entry.getStrDesc());
@@ -59,7 +60,7 @@ public class CsvFileWriter {
 			fileWriter.append(myObj.toString());
 			fileWriter.append(COMMA_DELIMITER);
 			fileWriter.append(entry.getstrNotes());
-			// fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(COMMA_DELIMITER);
 			// }
 
 			// System.out.println("Transaction log CSV file was updated successfully !!!");
@@ -110,7 +111,7 @@ public class CsvFileWriter {
 			fileWriter.append(myObj.toString());
 			fileWriter.append(COMMA_DELIMITER);
 			fileWriter.append(entry.getstrNotes());
-			// fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(COMMA_DELIMITER);
 			// }
 
 			// System.out.println("Transaction log CSV file was updated successfully !!!");
