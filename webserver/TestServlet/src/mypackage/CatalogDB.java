@@ -87,8 +87,11 @@ public class CatalogDB {
 
 			strID = strKey.toLowerCase();
 			if(strID.startsWith(query)) {
-				strEntry = strID + "," + mapCatalog.get(strKey).getStrDesc();
-				matched.add(strEntry);
+				if (mapCatalog.containsKey(strKey))
+				{
+					strEntry = strID + "," + mapCatalog.get(strKey).getStrDesc();
+					matched.add(strEntry);
+				}
 			}
 
 		}
@@ -103,6 +106,15 @@ public class CatalogDB {
 	public HashMap<String, String> GetMiniInvMap()
 	{
 		return mapMiniInv;
+	}
+
+	public String GetBinNUmber (String strMaterialID)
+	{
+		MaterialCatalog objCatalog = mapCatalog.get(strMaterialID);
+		if (null == objCatalog)
+			return null;
+
+		return objCatalog.getStrBinNo();
 	}
 
 }

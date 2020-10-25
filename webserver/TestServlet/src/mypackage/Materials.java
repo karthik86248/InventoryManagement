@@ -35,7 +35,7 @@ public class Materials extends HttpServlet {
 	public String test;
 	CsvFileReader readFile = new CsvFileReader();
 	CsvFileWriter writeFile = new CsvFileWriter();
-	public static String REPORTS_FILE_PATH = "C:\\MyInventoryLogs\\"; // all user generated reports
+	public static String REPORTS_FILE_PATH = "C:\\MyInventoryReports\\"; // all user generated reports
 	public static String DB_FILE_PATH = "C:\\MyInventoryDB\\"; //  internally used files
 	private static String TRANS_FILE_PATH = DB_FILE_PATH + "Transaction.csv";
 	private static String PRODUCT_TRANS_FILE_PATH = DB_FILE_PATH + "ProductTransaction.csv";
@@ -47,12 +47,11 @@ public class Materials extends HttpServlet {
 		Properties prop = new Properties();
 		// This is the path of the properties file that will be used 
 		// while running directly as a WebApp under Tomcat
-		// If you are debugging under Eclipse IDE, then this path has to be
-		// adjusted per your choice
-		String fileName = "../webapps/MyInvenotoryMgmt.config";
+		String strROOT = System.getenv("CATALINA_HOME");  
+		String fileName = strROOT +  "/webapps/MyInvenotoryMgmt.config";
+		System.out.println("Properties File = " + fileName);
 		InputStream is = null;
 		try {
-
 		  String currentDirectory = System.getProperty("user.dir");
 	      System.out.println("The current working directory is " + currentDirectory);
 
@@ -132,7 +131,7 @@ public class Materials extends HttpServlet {
 			// Update Materials
 			String strIDPlusDesc = request.getParameter("M_ID");
 			strUpdateMessage = "Material Update:";
-			strUpdateMessage += "\r\n";
+			strUpdateMessage += "<br>";
 
 			if (strIDPlusDesc.isEmpty() != true && strIDPlusDesc.indexOf(COMMA_DELIMITER) != -1) {
 				String[] tokens = strIDPlusDesc.split(COMMA_DELIMITER);
@@ -152,7 +151,14 @@ public class Materials extends HttpServlet {
 				if (strID.isEmpty() != true && nMaterialQty != 0) {
 					MaterialInfo entry = new MaterialInfo(Integer.parseInt(strQty), strDesc, strNotes);
 					writeFile.writeCsvFile(TRANS_FILE_PATH, strID, entry, map);
-					strUpdateMessage += "\tMaterial ID = " + strID + entry;
+				
+					CatalogDB obj = new CatalogDB();
+					
+					strUpdateMessage += "\r\n";
+					strUpdateMessage += "Material ID = " + strID;
+					strUpdateMessage += entry ;
+					strUpdateMessage += "<br>";
+					strUpdateMessage = strUpdateMessage + "BinNumber = " + obj.GetBinNUmber(strID);
 				}
 			}
 
@@ -173,7 +179,7 @@ public class Materials extends HttpServlet {
 				ProductInfo entryProd = new ProductInfo(Integer.parseInt(strProductQty), strProductNotes);
 				UpdateProduct(strProductName, nProdQty,strProductNotes);
 				writeFile.writeToProdTransactionCsvFile(PRODUCT_TRANS_FILE_PATH, strProductName, entryProd);
-				strUpdateMessage = strUpdateMessage + "\n\tProduct Name =" + strProductName + " Quantity = "
+				strUpdateMessage = strUpdateMessage + "\r\n\tProduct Name =" + strProductName + " Quantity = "
 						+ strProductQty;
 			}
 			

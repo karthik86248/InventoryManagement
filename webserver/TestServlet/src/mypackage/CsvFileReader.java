@@ -24,6 +24,15 @@ public class CsvFileReader {
 	private static final int CATALOG_QTY_IDX = 0;
 	// private static final int CATALOG_DESC_IDX = 1;
 
+	// Catalog/file MAterial Description indes
+	// ID,Description,QTY,TimeStamp
+	private static final int CATALOG_MATERIAL_ID_IDX = 0;
+	private static final int CATALOG_MATERIAL_DESC_IDX = 1;
+	// private static final int MATERIAL_QTY_IDX = 2;
+	private static final int CATALOG_BINNUMBER_IDX = 2;
+	// private static final int CATALOG_DESC_IDX = 1;
+
+
 	// Reads the Transaction log
 	public void readCsvFile(String fileName, HashMap<String, MaterialInfo> map) {
 
@@ -31,7 +40,7 @@ public class CsvFileReader {
 
 		try {
 			String line = "";
-			
+
 
 			// Create the file reader
 			fileReader = new BufferedReader(new FileReader(fileName));
@@ -47,7 +56,7 @@ public class CsvFileReader {
 				String strConcatenatedDesc ="";
 				// Get all tokens available in line
 				String[] tokens = line.split(COMMA_DELIMITER);
-			
+
 				// handle case when the Desc has commas
 				if (tokens.length > 5) {
 					for (int nIter = 1; nIter < tokens.length - 3; nIter++)
@@ -99,13 +108,29 @@ public class CsvFileReader {
 			fileReader.readLine();
 
 			// Read the file line by line starting from the second line
+			// Read the file line by line starting from the second line
+			// ID,Desc,BinNUmber
+			// 0  1    2         <- token index
+			// Note: Desc could contain commas
+
 			while ((line = fileReader.readLine()) != null) {
+				String strConcatenatedDesc ="";
+
 				// Get all tokens available in line
 				String[] tokens = line.split(COMMA_DELIMITER);
-				if (tokens.length > 0) {
+
+				// handle case when the Desc has commas
+				if (tokens.length > 3) {
+					for (int nIter = 1; nIter < tokens.length - 1; nIter++)
+						strConcatenatedDesc += tokens[nIter];
+				}
+	
+				if (tokens.length >= 3) {
 					// Create a new student object and fill his data
 					// ToDO, ensure going to +1 character does not fall off the string
-					MaterialCatalog entry = new MaterialCatalog(line.substring(line.indexOf(COMMA_DELIMITER)+1));
+					
+					MaterialCatalog entry = new MaterialCatalog(tokens.length > 3 ? strConcatenatedDesc : tokens[CATALOG_MATERIAL_DESC_IDX],
+																tokens[CATALOG_BINNUMBER_IDX]);
 					System.out.println("Adding to ProdCatalogmap ID=" + tokens[MATERIAL_ID_IDX] + entry);
 					mapCatalog.put(tokens[MATERIAL_ID_IDX], entry);
 
@@ -192,7 +217,7 @@ public class CsvFileReader {
 						mapProdBOM.put(strProdName, listMaterials);
 						CatalogDB.InsertIntoProductList(strProdName);
 						listMaterials = new MaterialList();
-						strProdName = tokens[0]; 
+						strProdName = tokens[0];
 					} else {
 						// marks start of a fresh product BOM
 						strProdName = tokens[0];

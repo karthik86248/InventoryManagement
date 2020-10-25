@@ -9,7 +9,7 @@ import java.time.LocalDateTime; // import the LocalDate class
 
 /**
  * @author ashraf
- * 
+ *
  */
 public class CsvFileWriter {
 
@@ -85,7 +85,7 @@ public class CsvFileWriter {
 	 * Write MaterialInfo contents to the specified Transaction log fileName and the map
 	 */
 
-	public void writeToProdTransactionCsvFile(String fileName, String strName, 
+	public void writeToProdTransactionCsvFile(String fileName, String strName,
 			ProductInfo entry) {
 
 		FileWriter fileWriter = null;
@@ -131,10 +131,10 @@ public class CsvFileWriter {
 
 		}
 	}
-	
-	
-	
-	
+
+
+
+
 	/*
 	 * Write HashMap contents to the specified fileName
 	 */
@@ -151,7 +151,7 @@ public class CsvFileWriter {
 			// Add a new line separator after the header
 			fileWriter.append(NEW_LINE_SEPARATOR);
 
-			// Write a new student object list to the CSV file
+
 			for (String i : map.keySet()) {
 				fileWriter.append(i);
 				fileWriter.append(COMMA_DELIMITER);
@@ -201,13 +201,13 @@ public class CsvFileWriter {
 			for (String i : map.keySet()) {
 				if (null != mapMiniInv.get(i))
 				{
-				fileWriter.append(i);
-				fileWriter.append(COMMA_DELIMITER);
-				fileWriter.append(map.get(i).getStrDesc());
-				fileWriter.append(COMMA_DELIMITER);
-				fileWriter.append(String.valueOf(map.get(i).getnQty()));
-				fileWriter.append(COMMA_DELIMITER);
-				fileWriter.append(NEW_LINE_SEPARATOR);
+					fileWriter.append(i);
+					fileWriter.append(COMMA_DELIMITER);
+					fileWriter.append(map.get(i).getStrDesc());
+					fileWriter.append(COMMA_DELIMITER);
+					fileWriter.append(String.valueOf(map.get(i).getnQty()));
+					fileWriter.append(COMMA_DELIMITER);
+					fileWriter.append(NEW_LINE_SEPARATOR);
 				}
 			}
 
@@ -229,7 +229,7 @@ public class CsvFileWriter {
 		}
 
 	}
-	
+
 	public void writeCalculatedInventory(String fileName, final HashMap<String, MaterialInfo> map,
 			ProductPriority prodPrio) {
 
@@ -252,21 +252,21 @@ public class CsvFileWriter {
 		}
 
 		MaterialList listMaterials1 = objDB.GetMaterialsList(prodPrio.m_strProduct1Name);
-		System.out.println("ProductBOMmap Name=" + prodPrio.m_strProduct1Name +  "size=" + 
+		System.out.println("ProductBOMmap Name=" + prodPrio.m_strProduct1Name +  "size=" +
 		listMaterials1.Size());
 		if (listMaterials1 != null && listMaterials1.Size() > 0) {
 			mapMaterials1 = listMaterials1.GetMaterialListMap();
 		}
 
 		MaterialList listMaterials2 = objDB.GetMaterialsList(prodPrio.m_strProduct2Name);
-		System.out.println("ProductBOMmap Name=" + prodPrio.m_strProduct1Name +  "size=" + 
+		System.out.println("ProductBOMmap Name=" + prodPrio.m_strProduct1Name +  "size=" +
 		listMaterials2.Size());
 		if (listMaterials2 != null && listMaterials2.Size() > 0) {
 			mapMaterials2 = listMaterials2.GetMaterialListMap();
 		}
 
 		MaterialList listMaterials3 = objDB.GetMaterialsList(prodPrio.m_strProduct3Name);
-		System.out.println("ProductBOMmap Name=" + prodPrio.m_strProduct1Name +  "size=" + 
+		System.out.println("ProductBOMmap Name=" + prodPrio.m_strProduct1Name +  "size=" +
 		listMaterials3.Size());
 		if (listMaterials3 != null && listMaterials3.Size() > 0) {
 			mapMaterials3 = listMaterials3.GetMaterialListMap();
@@ -301,6 +301,11 @@ public class CsvFileWriter {
 				{
 					MaterialInfo entryNew = new MaterialInfo(nProduct1Qty_Calc,mapMaterials1.get(i).getStrDesc(),"");
 					// nProduct1Qty_Calc will be 0 anyways
+					// The BOM could have a material ID but the transaction map may not have it
+					// in that case, when we iterate the map further down we will write down
+					// fewer matieral IDs rows.
+					// All the material IDs in the BOM map should have an entry in the transaction Map
+					// at least with a zero transaction entry.
 					map.put(i, entryNew);
 				}
 			}
@@ -313,7 +318,7 @@ public class CsvFileWriter {
 				if (entry2 != null) {
 					nTemp = (entry2.getnQty()) / mapMaterials2.get(i).getnQty();
 					nProduct2Qty_Calc = nProduct2Qty_Calc <= nTemp ? nProduct2Qty_Calc : nTemp;
-																		
+
 					System.out.println("->ID:" + i + "Product2Qty_Calc=" + nProduct2Qty_Calc + "="
 							+ mapMaterials2.get(i).getnQty() + "/" + entry2.getnQty());
 				} else {
@@ -333,7 +338,7 @@ public class CsvFileWriter {
 					MaterialInfo entryNew = new MaterialInfo(nProduct2Qty_Calc,mapMaterials2.get(i).getStrDesc(),"");
 					map.put(i, entryNew);
 				}
-				
+
 			}
 		}//if (mapMaterials2 != null)
 
@@ -361,7 +366,7 @@ public class CsvFileWriter {
 					MaterialInfo entryNew = new MaterialInfo(nProduct3Qty_Calc,mapMaterials3.get(i).getStrDesc(),"");
 					map.put(i, entryNew);
 				}
-				
+
 			}
 		} // if (mapMaterials3 != null)
 
@@ -392,7 +397,8 @@ public class CsvFileWriter {
 			fileWriter.append("Shortage/excess to meet target");
 			fileWriter.append(NEW_LINE_SEPARATOR);
 
-			// Write a new student object list to the CSV file
+			// Starting writing out the achievable targets within current stocks and
+			// actual excess/shortage of materials to reach specified targets
 			for (String i : map.keySet()) {
 
 				nMateriaReqdForProd = 0;
@@ -447,7 +453,7 @@ public class CsvFileWriter {
 			fileWriter.append(COMMA_DELIMITER);
 			fileWriter.append(String.valueOf(prodPrio.m_nProduct3Qty ));
 			fileWriter.append(NEW_LINE_SEPARATOR);
-			
+
 			fileWriter.append(COMMA_DELIMITER);
 			fileWriter.append("Achievable product targets in current inventory ->");
 			fileWriter.append(COMMA_DELIMITER);
@@ -458,7 +464,7 @@ public class CsvFileWriter {
 			fileWriter.append(COMMA_DELIMITER);
 			fileWriter.append(String.valueOf(nProduct3Qty_Calc));
 			fileWriter.append(NEW_LINE_SEPARATOR);
-			
+
 			fileWriter.append(COMMA_DELIMITER);
 			fileWriter.append("Material (type/ID) counts -> ");
 			fileWriter.append(COMMA_DELIMITER);
@@ -470,7 +476,7 @@ public class CsvFileWriter {
 			fileWriter.append(COMMA_DELIMITER);
 			fileWriter.append(String.valueOf(mapMaterials3.size()));
 			fileWriter.append(NEW_LINE_SEPARATOR);
-			
+
 			System.out.println("Calculate-Inventory CSV file was created successfully !!!");
 
 		} catch (Exception e) {

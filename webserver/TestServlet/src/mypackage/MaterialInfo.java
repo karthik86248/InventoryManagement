@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Date;
 public class MaterialInfo {
-	
+	// Transactional Data (dynamic)
 	//String  strID;
 	String  strDesc; // Description of the meterial
 	int nQty;
@@ -58,7 +58,8 @@ public class MaterialInfo {
 	
 	public String toString()
 	{
-		return " Desc = " + this.strDesc + " Qty = " + Integer.toString(nQty) ;
+		return " Desc = " + this.strDesc + " Qty = " + Integer.toString(nQty) + 
+				" Notes = " + this.strNotes;
 	}
 
 	/*
